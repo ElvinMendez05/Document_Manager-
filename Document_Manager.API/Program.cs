@@ -31,15 +31,15 @@ builder.Services.AddCors(options =>
     );
 });
 
+//Services Identity 
+builder.Services.AddIdentityServices(builder.Configuration);
+
 //builder.Services.AddValidatorsFromAssembly(
 //    typeof(CreateDocumentDtoValidator).Assembly
 //);
 
 var app = builder.Build();
 
-// =======================
-// HTTP Request Pipeline
-// =======================
 
 // Middleware de manejo de excepciones (Siempre de los primeros)
 app.UseMiddleware<ExceptionMiddleware>();

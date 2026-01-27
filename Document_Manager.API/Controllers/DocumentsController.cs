@@ -59,6 +59,27 @@ namespace Document_Manager.API.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] UploadDocumentRequest request)
         {
+            // 1️ Validar que venga archivo
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest("No se ha enviado ningún archivo.");
+
+            // 2️ Lista blanca de extensiones permitidas
+            var allowedExtensions = new[] { ".pdf" };
+            var fileExtension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(fileExtension))
+                return BadRequest("Solo se permiten archivos PDF.");
+
+            // 3️ Validar Content-Type
+            if (request.File.ContentType != "application/pdf")
+                return BadRequest("El archivo no es un PDF válido.");
+
+            // 4️ (Opcional) Tamaño máximo (ejemplo: 10MB)
+            const long maxFileSize = 10 * 1024 * 1024;
+            if (request.File.Length > maxFileSize)
+                return BadRequest("El archivo excede el tamaño máximo permitido (10MB).");
+
+            // Guardado del archivo
             var uploadsFolder = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
@@ -69,14 +90,16 @@ namespace Document_Manager.API.Controllers
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
+            var fileName = $"{Guid.NewGuid()}{fileExtension}";
             var physicalPath = Path.Combine(uploadsFolder, fileName);
 
             using var stream = new FileStream(physicalPath, FileMode.Create);
             await request.File.CopyToAsync(stream);
 
+            // URL pública
             var publicUrl = $"/uploads/documents/{fileName}";
 
+            // DTO para Application
             var dto = new CreateDocumentDto
             {
                 FileName = request.File.FileName,
@@ -88,26 +111,31 @@ namespace Document_Manager.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
-
-        //// POST: api/documents/upload
         //[HttpPost("upload")]
         //public async Task<IActionResult> Upload([FromForm] UploadDocumentRequest request)
         //{
-        //    var uploadsFolder = Path.Combine("Uploads", "Documents");
+        //    var uploadsFolder = Path.Combine(
+        //        Directory.GetCurrentDirectory(),
+        //        "wwwroot",
+        //        "uploads",
+        //        "documents"
+        //    );
 
         //    if (!Directory.Exists(uploadsFolder))
         //        Directory.CreateDirectory(uploadsFolder);
 
         //    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
-        //    var filePath = Path.Combine(uploadsFolder, fileName);
+        //    var physicalPath = Path.Combine(uploadsFolder, fileName);
 
-        //    using var stream = new FileStream(filePath, FileMode.Create);
+        //    using var stream = new FileStream(physicalPath, FileMode.Create);
         //    await request.File.CopyToAsync(stream);
+
+        //    var publicUrl = $"/uploads/documents/{fileName}";
 
         //    var dto = new CreateDocumentDto
         //    {
         //        FileName = request.File.FileName,
-        //        FilePath = filePath
+        //        FilePath = publicUrl
         //    };
 
         //    var id = await _documentService.CreateAsync(dto);

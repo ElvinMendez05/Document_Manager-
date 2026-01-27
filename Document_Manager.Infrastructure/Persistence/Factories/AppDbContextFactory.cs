@@ -12,7 +12,7 @@ namespace Document_Manager.Infrastructure.Persistence.Factories
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
             optionsBuilder.UseSqlServer(
-                "Server=DESKTOP-2HB8NU4;Database=DocumentManagerDb;Trusted_Connection=True;TrustServerCertificate=True;");
+                "Server=(localdb)\\MSSQLLocalDB;Database=DocumentManagerDb;Trusted_Connection=True;TrustServerCertificate=True;");
 
             return new AppDbContext(optionsBuilder.Options);
         }

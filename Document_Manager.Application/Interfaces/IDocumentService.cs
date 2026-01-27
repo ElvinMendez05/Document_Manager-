@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Document_Manager.Application.DTOs;
+﻿using Document_Manager.Application.DTOs;
 
 namespace Document_Manager.Application.Interfaces
 {

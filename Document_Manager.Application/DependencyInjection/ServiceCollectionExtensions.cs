@@ -1,6 +1,4 @@
-﻿
-
-using Document_Manager.Application.Interfaces;
+﻿using Document_Manager.Application.Interfaces;
 using Document_Manager.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 

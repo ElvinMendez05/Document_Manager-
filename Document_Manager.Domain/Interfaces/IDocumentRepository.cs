@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Document_Manager.Domain.Entities;
+﻿using Document_Manager.Domain.Entities;
 
 namespace Document_Manager.Domain.Interfaces
 {
