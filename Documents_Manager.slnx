@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/API/">
+    <Project Path="Document_Manager.API/Document_Manager.API.csproj" />
+  </Folder>
+  <Folder Name="/Application/">
+    <Project Path="Document_Manager.Application/Document_Manager.Application.csproj" />
+  </Folder>
+  <Folder Name="/Domain/">
+    <Project Path="Document_Manager.Domain/Document_Manager.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Document_Manager.Infrastructure/Document_Manager.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="Document_Manager.Presentation/Document_Manager.Presentation.csproj" />
+  </Folder>
+</Solution>

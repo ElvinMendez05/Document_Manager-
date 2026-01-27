@@ -1,0 +1,142 @@
+
+:root {
+    --primary: #6366f1;
+    --sidebar-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --hover-bg: rgba(99, 102, 241, 0.1);
+    --body-bg: #f1f5f9;
+}
+
+/* Contenedor Sidebar en Blazor */
+.sidebar-wrapper {
+    width: 280px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    position: sticky;
+    top: 0;
+}
+
+/* Header & Logo */
+.sidebar-header-custom {
+    margin-bottom: 2rem;
+}
+
+.logo-custom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.logo-icon-custom {
+    font-size: 2rem;
+}
+
+/* Navegación */
+.nav-label-custom {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.75rem 0.5rem;
+}
+
+.nav-link-custom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.8rem 1rem;
+    color: var(--text-muted) !important;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    margin-bottom: 0.2rem;
+}
+
+    .nav-link-custom i {
+        font-size: 1.2rem;
+    }
+
+    /* Hover y Activo */
+    .nav-link-custom:hover {
+        background-color: var(--hover-bg);
+        color: var(--primary) !important;
+    }
+
+    .nav-link-custom.active {
+        background-color: var(--primary) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+/* Footer / User Card */
+.sidebar-footer-custom {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.user-card-custom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    border-radius: 15px;
+}
+
+    .user-card-custom img {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+
+.user-info-custom {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.username-custom {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    text-truncate: ellipsis;
+}
+
+.plan-custom {
+    font-size: 0.7rem;
+    color: var(--primary);
+}
+
+.logout-btn-custom {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+    .logout-btn-custom:hover {
+        color: #ef4444;
+    }
+
+/* Ajustes del Main Content */
+.top-row-custom {
+    height: 3.5rem;
+    background-color: white;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+}
+
+body {
+    background-color: var(--body-bg);
+}

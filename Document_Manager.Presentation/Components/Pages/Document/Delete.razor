@@ -1,0 +1,118 @@
+﻿@page "/documents/delete"
+@using Document_Manager.Presentation.Model
+@using Document_Manager.Presentation.Services
+@inject DocumentApiService DocumentService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<style>
+    .card-document {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.2s ease;
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+        .card-document:hover {
+            transform: translateY(-5px);
+        }
+
+    .pdf-preview iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .btn-delete-pdf {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-weight: 600;
+    }
+
+        .btn-delete-pdf:hover {
+            background-color: #bb2d3b;
+            color: white;
+        }
+
+    .doc-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4">🗑️ Eliminar Documentos</h2>
+
+    @if (documents == null)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-danger"></div>
+            <p class="text-muted mt-2">Cargando documentos...</p>
+        </div>
+    }
+    else if (!documents.Any())
+    {
+        <div class="alert alert-light text-center shadow-sm py-5 border-0">
+            <h4 class="text-muted">No hay documentos</h4>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var doc in documents)
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card card-document shadow-sm h-100">
+
+                        <div class="ratio ratio-4x3 pdf-preview">
+                            <iframe src="@($"{doc.FilePath}#page=1&toolbar=0&navpanes=0")"></iframe>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="doc-title text-truncate">@doc.FileName</h5>
+
+                            <button class="btn btn-delete-pdf w-100 mt-3"
+                                    @onclick="() => ConfirmDelete(doc.Id)">
+                                 Eliminar PDF
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<DocumentViewModel>? documents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        documents = await DocumentService.GetAllAsync();
+    }
+
+    private async Task ConfirmDelete(int id)
+    {
+        var confirm = await JS.InvokeAsync<bool>(
+            "confirm", "¿Estás seguro de eliminar este PDF?"
+        );
+
+        if (!confirm) return;
+
+        var deleted = await DocumentService.DeleteAsync(id);
+
+        if (deleted)
+        {
+            documents = documents!
+                .Where(d => d.Id != id)
+                .ToList();
+        }
+    }
+}

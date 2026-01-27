@@ -1,0 +1,158 @@
+﻿@page "/documents"
+@using Document_Manager.Presentation.Model
+@using Document_Manager.Presentation.Services
+@inject DocumentApiService DocumentService
+@rendermode InteractiveServer
+
+<style>
+    /* Estilos para igualar el diseño de la imagen */
+    .card-document {
+        border: none;
+        border-radius: 16px;
+        transition: transform 0.2s ease;
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+        .card-document:hover {
+            transform: translateY(-5px);
+        }
+
+    .img-container {
+        height: 160px;
+        overflow: hidden;
+    }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .btn-view-pdf {
+        background-color: #5C5CFF; /* Azul/Violeta de la imagen */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+
+        .btn-view-pdf:hover {
+            background-color: #4A4AE6;
+            color: white;
+        }
+
+    .doc-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .doc-description {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .pdf-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,.4), transparent);
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        padding: 12px;
+        pointer-events: none;
+    }
+
+        .pdf-overlay i {
+            font-size: 1.8rem;
+            color: #dc3545;
+            background: #fff;
+            padding: 6px;
+            border-radius: 8px;
+        }
+</style>
+
+<div class="container mt-4">
+    @* Cabecera con botón de subir *@
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 class="fw-bold m-0">📄 Mis Documentos</h2>
+        <a href="/documents/upload" class="btn btn-primary px-4 shadow-sm">
+            <i class="bi bi-plus-lg"></i> Subir Nuevo
+        </a>
+    </div>
+
+    @if (documents == null)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Obteniendo tus archivos...</p>
+        </div>
+    }
+    else if (!documents.Any())
+    {
+        <div class="alert alert-light text-center shadow-sm py-5 border-0" style="border-radius: 15px;">
+            <h4 class="text-muted">¡Nada por aquí!</h4>
+            <p class="mb-0">Aún no has subido ningún documento. ¡Empieza subiendo el primero!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var doc in documents)
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card card-document shadow-sm h-100">
+                        
+                        @* Estilo para la imagen del pdf  *@
+                        <div class="ratio ratio-4x3 pdf-preview mb-3">
+                            <iframe src="@($"{doc.FilePath}#page=1&toolbar=0&navpanes=0")"
+                                    title="@doc.FileName">
+                            </iframe>
+
+                            <div class="pdf-overlay">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="doc-title text-truncate" title="@doc.FileName">
+                                @doc.FileName
+                            </h5>
+                            <p class="doc-description flex-grow-1">
+                                <i class="bi bi-calendar3 me-1"></i> Subido el @doc.CreatedAt.ToString("dd MMM yyyy")
+                            </p>
+
+                            @* Botón estilo la imagen *@
+                            <a href="@doc.FilePath" target="_blank" class="btn btn-view-pdf w-100 mt-3">
+                                Ver PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<DocumentViewModel>? documents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            documents = await DocumentService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            documents = new List<DocumentViewModel>();
+            Console.WriteLine($"Error cargando documentos: {ex.Message}");
+        }
+    }
+}

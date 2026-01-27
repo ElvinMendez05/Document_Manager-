@@ -1,0 +1,50 @@
+﻿<div class="sidebar-header-custom">
+    <div class="logo-custom">
+       @*  <i class="bi bi-layers-half logo-icon-custom"> </i>*@
+    @*    <i class="bi bi-folder2-open logo-icon-custom"></i> *@
+        @* <i class="bi-file-earmark-pdf logo-icon-custom"></i> *@
+        <i class="bi-collection logo-icon-custom"></i>
+        <span>Manejador de Documentos</span>
+    </div>
+</div>
+
+<div class="nav-scrollable-custom">
+    <nav class="sidebar-nav-custom">
+       
+        <p class="nav-label-custom">Principal</p>
+        <div class="nav-item-custom">
+            <NavLink class="nav-link-custom" href="documents">
+                <i class="bi bi-folder2-open"></i> Mis Archivos
+            </NavLink>
+        </div>
+
+        <p class="nav-label-custom"> Eliminar Mis Archivos </p>
+        <div class="nav-item-custom">
+            <NavLink class="nav-link-custom" href="/documents/delete">
+                <i class="bi bi-trash"></i> Eliminar Achivos
+            </NavLink>
+        </div>
+
+        <p class="nav-label-custom">Cargar Archivos</p>
+        <div class="nav-item-custom">
+            <NavLink class="nav-link-custom" href="documents/upload">
+                <i class="bi bi-cloud-arrow-up"></i> Subir Archivo
+            </NavLink>
+        </div>
+
+    </nav>
+</div>
+
+<div class="sidebar-footer-custom">
+    <div class="user-card-custom">
+        <img src="https://ui-avatars.com/api/?name=Elvin+Mendez&background=6366f1&color=fff" alt="User">
+        <div class="user-info-custom">
+            <span class="username-custom">Elvin Mendez</span>
+            <span class="plan-custom">Admin Pro</span>
+        </div>
+        <a href="/logout" title="Cerrar Sesión">
+            <i class="bi bi-box-arrow-right logout-btn-custom"></i>
+        </a>
+    </div>
+</div>
+

@@ -1,0 +1,152 @@
+﻿@page "/documents/upload"
+@using Document_Manager.Presentation.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject DocumentApiService DocumentService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<style>
+    .upload-container {
+        max-width: 800px;
+        margin-top: 50px;
+    }
+
+    .card-upload {
+        border: 2px dashed #d1d1d1;
+        border-radius: 20px;
+        padding: 40px;
+        background-color: #f9f9ff;
+        transition: all 0.3s ease;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .card-upload:hover {
+        border-color: #5C5CFF;
+        background-color: #f0f0ff;
+    }
+
+    /* Ocultamos el input real pero lo dejamos funcional */
+    .input-hidden {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #5C5CFF;
+        margin-bottom: 15px;
+    }
+
+    .btn-upload {
+        background-color: #5C5CFF;
+        color: white;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 4px 15px rgba(92, 92, 255, 0.3);
+    }
+
+    .btn-upload:disabled {
+            background-color: #4399CC;
+    }
+
+    .file-info {
+        background: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #eee;
+    }
+</style>
+
+<div class="container upload-container">
+    <div class="mb-4 d-flex align-items-center">
+        <button class="btn btn-link text-decoration-none text-dark p-0 me-3" @onclick='() => Navigation.NavigateTo("/documents")'>
+            <i class="bi bi-arrow-left fs-4"></i>
+        </button>
+        <h2 class="fw-bold m-0">Subir Documento</h2>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="border-radius: 20px;">
+        <div class="card-body">
+            
+            @* Zona de carga visual *@
+            <div class="card-upload mb-4">
+                <InputFile OnChange="OnFileSelected" class="input-hidden" />
+                <div class="upload-icon">
+                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                </div>
+                <h5>Selecciona o arrastra tu archivo</h5>
+                <p class="text-muted small">Formatos permitidos: PDF (Máx. 10MB)</p>
+            </div>
+
+            @if (selectedFile != null)
+            {
+                <div class="file-info d-flex align-items-center mb-4 shadow-sm">
+                    <div class="me-3">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-2"></i>
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="mb-0 fw-bold text-truncate">@selectedFile.Name</p>
+                        <small class="text-muted">@((selectedFile.Size / 1024.0 / 1024.0).ToString("F2")) MB</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary border-0" @onclick="() => selectedFile = null">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            }
+
+            <button class="btn btn-upload btn-primary w-100 py-3" 
+                    @onclick="UploadDocument" 
+                    disabled="@(selectedFile == null || isUploading)">
+                @if (isUploading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span>Subiendo...</span>
+                }
+                else
+                {
+                    <span>Confirmar y Subir</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IBrowserFile? selectedFile;
+    private bool isUploading = false;
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+
+    private async Task UploadDocument()
+    {
+        if (selectedFile is null) return;
+
+        isUploading = true;
+        try
+        {
+            await DocumentService.UploadAsync(selectedFile);
+            // Redirigir a la lista de documentos después del éxito
+            Navigation.NavigateTo("/documents");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            isUploading = false;
+        }
+    }
+}
