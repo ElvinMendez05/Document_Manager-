@@ -7,5 +7,6 @@ namespace Document_Manager.Application.Interfaces
         Task RegisterAsync(RegisterDto dto);
         Task<string> LoginAsync(LoginDto dto);
         Task ForgotPasswordAsync(ForgotPasswordDto dto);
+        Task ResetPasswordAsync(ResetPasswordDto dto);
     }
 }

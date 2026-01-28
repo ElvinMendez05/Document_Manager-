@@ -63,7 +63,26 @@ namespace Document_Manager.API.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
         {
             await _authService.ForgotPasswordAsync(dto);
-            return Ok(new { message = "Si el correo existe, se enviará un enlace de recuperación" });
+
+            return Ok(new
+            {
+                message = "Si el correo existe, recibirás un enlace para restablecer tu contraseña."
+            });
+        }
+
+        //POST: api/auth/reset-password
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            try
+            {
+                await _authService.ResetPasswordAsync(dto);
+                return Ok(new { message = "Contraseña actualizada correctamente" });
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

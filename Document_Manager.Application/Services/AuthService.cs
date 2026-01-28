@@ -10,11 +10,15 @@ namespace Document_Manager.Application.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IEmailService _emailService;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService)
+        public AuthService(UserManager<ApplicationUser> userManager, 
+            IJwtTokenService jwtTokenService, 
+            IEmailService emailService)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _emailService = emailService;
         }
 
         // REGISTER
@@ -68,9 +72,41 @@ namespace Document_Manager.Application.Services
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user == null)
-                return;
+                return; // seguridad
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var resetLink =
+                $"https://tu-frontend/reset-password?token={Uri.EscapeDataString(token)}&email={dto.Email}";
+
+            await _emailService.SendAsync(
+                dto.Email,
+                "Restablecer contraseña",
+                $"Haz clic aquí para restablecer tu contraseña:\n{resetLink}"
+            );
+        }
+
+        // ResetPasswordAsync
+        public async Task ResetPasswordAsync(ResetPasswordDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user == null)
+                throw new ApplicationException("Usuario no encontrado");
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                dto.Token,
+                dto.NewPassword
+                );
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ",
+                    result.Errors.Select(e => e.Description));
+
+                throw new ApplicationException(errors);
+            }
         }
     }
 }

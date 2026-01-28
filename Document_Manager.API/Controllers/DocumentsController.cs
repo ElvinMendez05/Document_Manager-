@@ -1,10 +1,12 @@
 ﻿using Document_Manager.API.DTOs;
 using Document_Manager.Application.DTOs;
 using Document_Manager.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Document_Manager.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class DocumentsController : ControllerBase
@@ -110,37 +112,5 @@ namespace Document_Manager.API.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
-
-        //[HttpPost("upload")]
-        //public async Task<IActionResult> Upload([FromForm] UploadDocumentRequest request)
-        //{
-        //    var uploadsFolder = Path.Combine(
-        //        Directory.GetCurrentDirectory(),
-        //        "wwwroot",
-        //        "uploads",
-        //        "documents"
-        //    );
-
-        //    if (!Directory.Exists(uploadsFolder))
-        //        Directory.CreateDirectory(uploadsFolder);
-
-        //    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
-        //    var physicalPath = Path.Combine(uploadsFolder, fileName);
-
-        //    using var stream = new FileStream(physicalPath, FileMode.Create);
-        //    await request.File.CopyToAsync(stream);
-
-        //    var publicUrl = $"/uploads/documents/{fileName}";
-
-        //    var dto = new CreateDocumentDto
-        //    {
-        //        FileName = request.File.FileName,
-        //        FilePath = publicUrl
-        //    };
-
-        //    var id = await _documentService.CreateAsync(dto);
-
-        //    return CreatedAtAction(nameof(GetById), new { id }, null);
-        //}
     }
 }

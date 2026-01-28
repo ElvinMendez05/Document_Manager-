@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Document_Manager.Application.DTOs
+﻿namespace Document_Manager.Application.DTOs
 {
     public class DocumentDto
     {

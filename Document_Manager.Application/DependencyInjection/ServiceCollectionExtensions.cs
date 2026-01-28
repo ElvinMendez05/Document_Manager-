@@ -11,6 +11,7 @@ namespace Document_Manager.Application.DependencyInjection
             
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             return services;
         }
