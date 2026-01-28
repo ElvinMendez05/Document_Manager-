@@ -1,13 +1,12 @@
+using System.Text;
 using Document_Manager.API.Middlewares;
 using Document_Manager.Application.DependencyInjection;
 using Document_Manager.Application.Validators;
 using Document_Manager.Infrastructure.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// =======================
-// Service Configuration
-// =======================
 
 // Controllers
 builder.Services.AddControllers();
@@ -34,6 +33,26 @@ builder.Services.AddCors(options =>
 //Services Identity 
 builder.Services.AddIdentityServices(builder.Configuration);
 
+//Registro JWT 
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+
 //builder.Services.AddValidatorsFromAssembly(
 //    typeof(CreateDocumentDtoValidator).Assembly
 //);
@@ -43,6 +62,8 @@ var app = builder.Build();
 
 // Middleware de manejo de excepciones (Siempre de los primeros)
 app.UseMiddleware<ExceptionMiddleware>();
+
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -56,6 +77,8 @@ app.UseHttpsRedirection();
 // y siempre ANTES de UseAuthorization y MapControllers
 app.UseCors("AllowBlazor");
 
+//Authentication
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

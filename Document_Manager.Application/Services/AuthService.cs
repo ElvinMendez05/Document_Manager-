@@ -1,5 +1,6 @@
 ﻿using Document_Manager.Application.DTOs.Auth;
 using Document_Manager.Application.Interfaces;
+using Document_Manager.Application.Interfaces.Security;
 using Document_Manager.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
@@ -8,18 +9,15 @@ namespace Document_Manager.Application.Services
     public class AuthService : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-      
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IJwtTokenService _jwtTokenService;
 
-        public AuthService(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+        public AuthService(UserManager<ApplicationUser> userManager, IJwtTokenService jwtTokenService)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
+            _jwtTokenService = jwtTokenService;
         }
 
-        // 🔐 REGISTER
+        // REGISTER
         public async Task RegisterAsync(RegisterDto dto)
         {
             if (dto.Password != dto.ConfirmPassword)
@@ -48,30 +46,29 @@ namespace Document_Manager.Application.Services
             }
         }
 
-        // 🔑 LOGIN
-        public async Task LoginAsync(LoginDto dto)
+        // LOGIN 
+        public async Task<string> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user == null)
                 throw new ApplicationException("Credenciales inválidas");
 
-            var result = await _signInManager.CheckPasswordSignInAsync(
-                user,
-                dto.Password,
-                lockoutOnFailure: false);
+            var valid = await _userManager.CheckPasswordAsync(user, dto.Password);
 
-            if (!result.Succeeded)
+            if (!valid)
                 throw new ApplicationException("Credenciales inválidas");
+
+            return _jwtTokenService.GenerateToken(user);
         }
 
-        //FORGOT PASSWORD
+        // FORGOT PASSWORD
         public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user == null)
-                return; // seguridad: no revelar si existe o no
+                return;
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         }
