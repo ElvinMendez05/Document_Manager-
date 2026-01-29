@@ -1,11 +1,17 @@
 using Document_Manager.Presentation.Components;
 using Document_Manager.Presentation.Services;
+using Document_Manager.Presentation.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+//Add Auth Services 
+builder.Services.AddScoped<AuthApiService>();
+builder.Services.AddScoped<AuthViewModel>();
+builder.Services.AddScoped<TokenStorageService>();
 
 //API service
 builder.Services.AddHttpClient<DocumentApiService>(client =>

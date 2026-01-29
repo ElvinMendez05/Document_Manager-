@@ -1,10 +1,10 @@
-using System.Text;
 using Document_Manager.API.Middlewares;
 using Document_Manager.Application.DependencyInjection;
-using Document_Manager.Application.Validators;
 using Document_Manager.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +13,27 @@ builder.Services.AddControllers();
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+
+    options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer"),
+            new List<string>()
+        }
+    });
+});
 
 // Application & Infrastructure layers
 builder.Services.AddApplication();
@@ -53,17 +73,10 @@ builder.Services
         };
     });
 
-//builder.Services.AddValidatorsFromAssembly(
-//    typeof(CreateDocumentDtoValidator).Assembly
-//);
-
 var app = builder.Build();
-
 
 // Middleware de manejo de excepciones (Siempre de los primeros)
 app.UseMiddleware<ExceptionMiddleware>();
-
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -72,9 +85,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// El middleware de CORS debe ir después de UseRouting (si se usa) 
-// y siempre ANTES de UseAuthorization y MapControllers
+//Blazor 
 app.UseCors("AllowBlazor");
 
 //Authentication
@@ -84,3 +95,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

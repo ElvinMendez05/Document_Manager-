@@ -3,6 +3,7 @@ using Document_Manager.Application.DTOs;
 using Document_Manager.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Document_Manager.API.Controllers
 {
@@ -21,19 +22,29 @@ namespace Document_Manager.API.Controllers
 
         }
 
-        // GET: api/documents
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        // GET: api/documents/my-documents
+        // Devuelve SOLO los documentos del usuario autenticado
+        [HttpGet("my-documents")]
+        public async Task<IActionResult> GetMyDocuments()
         {
-            var documents = await _documentService.GetAllAsync();
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var documents = await _documentService.GetByUserAsync(userId);
             return Ok(documents);
         }
 
         // GET: api/documents/{id}
+        // Obtiene un documento SOLO si pertenece al usuario
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var document = await _documentService.GetByIdAsync(id);
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var document = await _documentService.GetByIdForUserAsync(id, userId);
 
             if (document == null)
                 return NotFound();
@@ -41,47 +52,37 @@ namespace Document_Manager.API.Controllers
             return Ok(document);
         }
 
-        // POST: api/documents
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateDocumentDto dto)
-        {
-            var id = await _documentService.CreateAsync(dto);
 
-            return CreatedAtAction(nameof(GetById), new { id }, dto);
-        }
-
-        // DELETE: api/documents/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _documentService.DeleteAsync(id);
-            return NoContent();
-        }
-
+        // POST: api/documents/upload
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] UploadDocumentRequest request)
         {
-            // 1️ Validar que venga archivo
+            // Validar archivo
             if (request.File == null || request.File.Length == 0)
                 return BadRequest("No se ha enviado ningún archivo.");
 
-            // 2️ Lista blanca de extensiones permitidas
+            // Validar extensión
             var allowedExtensions = new[] { ".pdf" };
             var fileExtension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(fileExtension))
                 return BadRequest("Solo se permiten archivos PDF.");
 
-            // 3️ Validar Content-Type
+            // Validar Content-Type
             if (request.File.ContentType != "application/pdf")
                 return BadRequest("El archivo no es un PDF válido.");
 
-            // 4️ (Opcional) Tamaño máximo (ejemplo: 10MB)
+            // Tamaño máximo (10MB)
             const long maxFileSize = 10 * 1024 * 1024;
             if (request.File.Length > maxFileSize)
                 return BadRequest("El archivo excede el tamaño máximo permitido (10MB).");
 
-            // Guardado del archivo
+            // Obtener UserId desde el JWT
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            // Guardar archivo físico
             var uploadsFolder = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
@@ -101,16 +102,31 @@ namespace Document_Manager.API.Controllers
             // URL pública
             var publicUrl = $"/uploads/documents/{fileName}";
 
-            // DTO para Application
+            // Crear DTO para Application
             var dto = new CreateDocumentDto
             {
                 FileName = request.File.FileName,
-                FilePath = publicUrl
+                FilePath = publicUrl,
+                UserId = userId
             };
 
             var id = await _documentService.CreateAsync(dto);
 
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
+
+
+        // DELETE: api/documents/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            await _documentService.DeleteForUserAsync(id, userId);
+            return NoContent();
+        }
+
     }
 }

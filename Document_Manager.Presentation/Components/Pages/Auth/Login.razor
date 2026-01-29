@@ -1,0 +1,236 @@
+﻿
+@page "/login"
+@using Document_Manager.Presentation.ViewModels
+@inject AuthViewModel VM
+@inject NavigationManager Nav
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --primary-hover: #4f46e5;
+        --dark-bg: #1a2235;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .login-page {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 1100px;
+        height: 700px;
+        background: white;
+        display: flex;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        margin: 20px;
+    }
+
+    /* Visual */
+    .login-visual {
+        flex: 1;
+        background: linear-gradient(135deg, #1e293b 0%, #4f46e5 100%);
+        padding: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        color: white;
+    }
+
+    .logo-light {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .visual-content h1 {
+        font-size: 42px;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    .visual-content p {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+
+    .visual-footer {
+        font-size: 13px;
+        opacity: 0.7;
+    }
+
+    /* Form */
+    .login-form-section {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px;
+    }
+
+    .form-box {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .form-header {
+        margin-bottom: 35px;
+    }
+
+        .form-header h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+        }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .label-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 12px 12px 45px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+        }
+
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+        .btn-login:hover {
+            background: var(--primary-hover);
+        }
+
+    .signup-text {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 14px;
+    }
+
+    
+</style>
+
+<link href="css/login.css" rel="stylesheet" />
+
+<div class="login-page">
+    <div class="login-container">
+
+        <!-- Visual -->
+        <div class="login-visual">
+            <div class="visual-content">
+                <div class="logo-light">
+                    <span>📚</span>
+                    <span>DocuStack</span>
+                </div>
+
+                <h1>Gestiona tus documentos con inteligencia.</h1>
+                <p>
+                    La plataforma más segura y rápida para organizar
+                    el flujo de trabajo de tu empresa.
+                </p>
+            </div>
+
+            <div class="visual-footer">
+                © 2026 DocuStack Inc. Todos los derechos reservados.
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="login-form-section">
+            <div class="form-box">
+
+                <div class="form-header">
+                    <h2>Bienvenido de nuevo</h2>
+                    <p>Ingresa tus credenciales para acceder.</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Correo electrónico</label>
+                    <div class="input-wrapper">
+                        <input type="email"
+                               placeholder="ejemplo@correo.com"
+                               @bind="VM.Email" />
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="label-row">
+                        <label>Contraseña</label>
+                        <a href="/forgot-password">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="password"
+                               placeholder="••••••••"
+                               @bind="VM.Password" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(VM.Error))
+                {
+                    <p style="color:red">@VM.Error</p>
+                }
+
+                <button class="btn-login" @onclick="HandleLogin">
+                    Iniciar Sesión
+                </button>
+
+                <p class="signup-text">
+                    ¿No tienes una cuenta?
+                    <a href="/register">Regístrate gratis</a>
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    @code {
+    private async Task HandleLogin()
+    {
+        var success = await VM.LoginAsync();
+        if (success)
+            Nav.NavigateTo("/documents", true);
+    }
+}
+}

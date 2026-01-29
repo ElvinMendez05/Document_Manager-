@@ -38,7 +38,7 @@ namespace Document_Manager.API.Controllers
 
         // POST: api/auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        public async Task<IActionResult> Login([FromBody] LoginRequest dto)
         {
             try
             {
@@ -84,5 +84,5 @@ namespace Document_Manager.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-    }
+    } 
 }

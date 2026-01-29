@@ -51,7 +51,7 @@ namespace Document_Manager.Application.Services
         }
 
         // LOGIN 
-        public async Task<string> LoginAsync(LoginDto dto)
+        public async Task<string> LoginAsync(LoginRequest dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
 
@@ -77,7 +77,7 @@ namespace Document_Manager.Application.Services
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             var resetLink =
-                $"https://tu-frontend/reset-password?token={Uri.EscapeDataString(token)}&email={dto.Email}";
+                $"https://localhost:/reset-password?token={Uri.EscapeDataString(token)}&email={dto.Email}";
 
             await _emailService.SendAsync(
                 dto.Email,

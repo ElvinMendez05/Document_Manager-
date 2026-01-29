@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Document_Manager.Domain.Entities
+﻿namespace Document_Manager.Domain.Entities
 {
     public class Document
     {
@@ -11,9 +7,12 @@ namespace Document_Manager.Domain.Entities
         public string FilePath { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
 
+        //Relacion con el usuario 
+        public Guid UserId { get; set; }
+
         protected Document() { } 
 
-        public Document(string fileName, string filePath)
+        public Document(string fileName, string filePath, Guid userId)
         {
 
             if (string.IsNullOrWhiteSpace(fileName))
@@ -25,6 +24,7 @@ namespace Document_Manager.Domain.Entities
             FileName = fileName;
             FilePath = filePath;
             CreatedAt = DateTime.UtcNow;
+            UserId = userId;
         }
     }
 }

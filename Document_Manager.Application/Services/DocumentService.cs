@@ -5,62 +5,84 @@ using Document_Manager.Domain.Entities;
 using Document_Manager.Domain.Interfaces;
 
 namespace Document_Manager.Application.Services
-{
-    public class DocumentService : IDocumentService
     {
-        private readonly IDocumentRepository _repository;
-
-        public DocumentService(IDocumentRepository repository)
+        public class DocumentService : IDocumentService
         {
-            _repository = repository;
-        }
+            private readonly IDocumentRepository _repository;
 
-        public async Task<int> CreateAsync(CreateDocumentDto dto)
-        {
-            var document = new Document(dto.FileName, dto.FilePath);
-
-            await _repository.AddAsync(document);
-
-            return document.Id;
-        }
-
-        public async Task<List<DocumentDto>> GetAllAsync()
-        {
-            var documents = await _repository.GetAllAsync();
-
-            return documents.Select(d => new DocumentDto
+            public DocumentService(IDocumentRepository repository)
             {
-                Id = d.Id,
-                FileName = d.FileName,
-                FilePath = d.FilePath,
-                CreatedAt = d.CreatedAt
-            }).ToList();
-        }
+                _repository = repository;
+            }
 
-        public async Task<DocumentDto?> GetByIdAsync(int id)
-        {
-            var document = await _repository.GetByIdAsync(id);
-
-            if (document is null)
-                return null;
-
-            return new DocumentDto
+            // Crear documento asociado al usuario
+            public async Task<int> CreateAsync(CreateDocumentDto dto)
             {
-                Id = document.Id,
-                FileName = document.FileName,
-                FilePath = document.FilePath,
-                CreatedAt = document.CreatedAt
-            };
-        }
+                var document = new Document(dto.FileName, dto.FilePath, dto.UserId);
 
-        public async Task DeleteAsync(int id)
-        {
-            var document = await _repository.GetByIdAsync(id);
+                await _repository.AddAsync(document);
 
-            if (document is null)
-                throw new Exception("Documento no encontrado");
+                return document.Id;
+            }
 
-            await _repository.DeleteAsync(document);
+            // Obtener documentos del usuario
+            public async Task<List<DocumentDto>> GetByUserAsync(Guid userId)
+            {
+                var documents = await _repository.GetByUserAsync(userId);
+
+                return documents.Select(d => new DocumentDto
+                {
+                    Id = d.Id,
+                    FileName = d.FileName,
+                    FilePath = d.FilePath,
+                    CreatedAt = d.CreatedAt
+                }).ToList();
+            }
+
+            // Obtener documento por ID SOLO si pertenece al usuario
+            public async Task<DocumentDto?> GetByIdForUserAsync(int id, Guid userId)
+            {
+                var document = await _repository.GetByIdForUserAsync(id, userId);
+
+                if (document is null)
+                    return null;
+
+                return new DocumentDto
+                {
+                    Id = document.Id,
+                    FileName = document.FileName,
+                    FilePath = document.FilePath,
+                    CreatedAt = document.CreatedAt
+                };
+            }
+        
+            // Eliminar documento SOLO si pertenece al usuario
+            public async Task DeleteForUserAsync(int id, Guid userId)
+            {
+                var document = await _repository.GetByIdForUserAsync(id, userId);
+
+                if (document is null)
+                    throw new Exception("Documento no encontrado o no autorizado");
+
+                await _repository.DeleteAsync(document);
+            }
+
+            //Ya no es tan util usarlo pero aqui esta 
+            public async Task<List<DocumentDto>> GetAllAsync()
+            {
+                var documents = await _repository.GetAllAsync();
+
+                return documents.Select(d => new DocumentDto
+                {
+                    Id = d.Id,
+                    FileName = d.FileName,
+                    FilePath = d.FilePath,
+                    CreatedAt = d.CreatedAt
+                }).ToList();
+            }
         }
     }
-}
+
+
+
+

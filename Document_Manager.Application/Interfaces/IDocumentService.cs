@@ -6,7 +6,10 @@ namespace Document_Manager.Application.Interfaces
     {
         Task<int> CreateAsync(CreateDocumentDto dto);
         Task<List<DocumentDto>> GetAllAsync();
-        Task<DocumentDto?> GetByIdAsync(int id);
-        Task DeleteAsync(int id);
+
+        //Interface de relacion con el usuario 
+        Task<List<DocumentDto>> GetByUserAsync(Guid userId);
+        Task DeleteForUserAsync(int id, Guid userId);
+        Task<DocumentDto?> GetByIdForUserAsync(int id, Guid userId);
     }
 }
