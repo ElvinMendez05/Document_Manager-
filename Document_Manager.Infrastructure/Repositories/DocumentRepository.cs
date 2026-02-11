@@ -37,13 +37,13 @@ namespace Document_Manager.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Document?> GetByIdForUserAsync(int id, Guid userId)
+        public async Task<Document?> GetByIdForUserAsync(Guid id, Guid userId)
         {
             return await _context.Documents
                 .FirstOrDefaultAsync(d => d.Id == id && d.UserId == userId);
         }
 
-        public async Task<List<Document>> GetByUserIdAsync(int id, Guid userId)
+        public async Task<List<Document>> GetByUserIdAsync(Guid id, Guid userId)
         {
             return await _context.Documents
                 .Where(d => d.Id == id && d.UserId == userId)

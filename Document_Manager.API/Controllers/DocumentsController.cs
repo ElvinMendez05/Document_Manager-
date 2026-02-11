@@ -38,7 +38,7 @@ namespace Document_Manager.API.Controllers
         // GET: api/documents/{id}
         // Obtiene un documento SOLO si pertenece al usuario
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var userId = Guid.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value
@@ -54,6 +54,7 @@ namespace Document_Manager.API.Controllers
 
 
         // POST: api/documents/upload
+        [Authorize]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] UploadDocumentRequest request)
         {
@@ -116,9 +117,10 @@ namespace Document_Manager.API.Controllers
         }
 
 
-        // DELETE: api/documents/{id}
+        // DELETE: api/documents/{id} 
+        [AllowAnonymous]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var userId = Guid.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value

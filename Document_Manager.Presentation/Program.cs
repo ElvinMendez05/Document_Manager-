@@ -11,13 +11,26 @@ builder.Services.AddRazorComponents()
 //Add Auth Services 
 builder.Services.AddScoped<AuthApiService>();
 builder.Services.AddScoped<AuthViewModel>();
-builder.Services.AddScoped<TokenStorageService>();
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<AuthMessageHandler>();
+builder.Services.AddScoped<JwtAuthorizationMessageHandler>();
+
 
 //API service
 builder.Services.AddHttpClient<DocumentApiService>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:5058/");
 });
+
+//Auth Service 
+builder.Services.AddHttpClient<AuthApiService>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5058/api/");
+})
+.AddHttpMessageHandler<AuthMessageHandler>(); //That is important 
+
+builder.Services.AddScoped(sp =>
+    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
 
 var app = builder.Build();
 

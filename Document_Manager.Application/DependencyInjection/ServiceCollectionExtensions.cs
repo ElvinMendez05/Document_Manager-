@@ -8,7 +8,6 @@ namespace Document_Manager.Application.DependencyInjection
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();

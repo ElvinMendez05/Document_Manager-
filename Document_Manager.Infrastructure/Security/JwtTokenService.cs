@@ -23,9 +23,13 @@ namespace Document_Manager.Infrastructure.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim("fullName", user.FullName)
+
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email!),
+                new Claim("fullName", user.FullName),
+
+                new Claim(ClaimTypes.Role, "Admin")
+            
             };
 
             var key = new SymmetricSecurityKey(

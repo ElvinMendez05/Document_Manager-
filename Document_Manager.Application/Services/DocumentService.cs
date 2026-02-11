@@ -16,7 +16,7 @@ namespace Document_Manager.Application.Services
             }
 
             // Crear documento asociado al usuario
-            public async Task<int> CreateAsync(CreateDocumentDto dto)
+            public async Task<Guid> CreateAsync(CreateDocumentDto dto)
             {
                 var document = new Document(dto.FileName, dto.FilePath, dto.UserId);
 
@@ -40,7 +40,7 @@ namespace Document_Manager.Application.Services
             }
 
             // Obtener documento por ID SOLO si pertenece al usuario
-            public async Task<DocumentDto?> GetByIdForUserAsync(int id, Guid userId)
+            public async Task<DocumentDto?> GetByIdForUserAsync(Guid id, Guid userId)
             {
                 var document = await _repository.GetByIdForUserAsync(id, userId);
 
@@ -57,7 +57,7 @@ namespace Document_Manager.Application.Services
             }
         
             // Eliminar documento SOLO si pertenece al usuario
-            public async Task DeleteForUserAsync(int id, Guid userId)
+            public async Task DeleteForUserAsync(Guid id, Guid userId)
             {
                 var document = await _repository.GetByIdForUserAsync(id, userId);
 
@@ -80,7 +80,7 @@ namespace Document_Manager.Application.Services
                     CreatedAt = d.CreatedAt
                 }).ToList();
             }
-        }
+    }
     }
 
 
