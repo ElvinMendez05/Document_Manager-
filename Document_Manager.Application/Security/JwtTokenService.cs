@@ -17,20 +17,22 @@ namespace Document_Manager.Infrastructure.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(ApplicationUser user)
+        public string GenerateToken(ApplicationUser user, IList<string> roles)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email!),
-                new Claim("fullName", user.FullName),
-
-                new Claim(ClaimTypes.Role, "Admin")
-            
+                new Claim(ClaimTypes.Name, user.FullName)
             };
+
+            // 🔥 Agregar roles reales del usuario
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings["Key"]!)

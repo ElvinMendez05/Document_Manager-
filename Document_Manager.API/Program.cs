@@ -2,11 +2,14 @@
 using Document_Manager.Application.DependencyInjection;
 using Document_Manager.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,18 +21,6 @@ builder.Services.AddControllers();
 // Application & Infrastructure layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// CORS Configuration for Blazor
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazor",
-        policy =>
-            policy.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-    );
-});
-
 
 builder.Services.AddAuthorization();
 
@@ -56,61 +47,30 @@ builder.Services
             ValidateIssuerSigningKey = true,
             ClockSkew = TimeSpan.Zero,
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            ),
 
             NameClaimType = ClaimTypes.NameIdentifier,
             RoleClaimType = ClaimTypes.Role
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("OnlyAdmins", policy =>
-        policy.RequireRole("Admin"));
-
-    options.AddPolicy("AdminOrManager", policy =>
-        policy.RequireRole("Admin", "Manager"));
-});
-
-
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ClockSkew = TimeSpan.Zero,
-//            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//            ValidAudience = builder.Configuration["Jwt:Audience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(
-//                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-
-//            // Esto le dice a .NET dónde buscar el ID del usuario
-//            NameClaimType = ClaimTypes.NameIdentifier,
-//            RoleClaimType = ClaimTypes.Role
-//        };
-//        options.AddPolicy("OnlyAdmins", policy =>
-//           policy.RequireRole("Admin"));
-//    });
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
-        In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT"
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Description = "Enter: Bearer {your JWT token}"
     });
 
     options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
@@ -122,34 +82,26 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-//builder.Services
-//    .AddAuthentication(options =>
-//    {
-//        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-//    })
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateLifetime = true,
-//            ValidateIssuerSigningKey = true,
-//            ValidIssuer = jwtSettings["Issuer"],
-//            ValidAudience = jwtSettings["Audience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(key),
-
-//            NameClaimType = ClaimTypes.NameIdentifier,
-//            RoleClaimType = ClaimTypes.Role
-//        };
-
-//        options.MapInboundClaims = false;
-//    });
-
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+    string[] roles = { "Admin", "User" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(
+                new IdentityRole<Guid> { Name = role }
+            );
+        }
+    }
+}
+
 
 // Middleware de manejo de excepciones (Siempre de los primeros)
 app.UseMiddleware<ExceptionMiddleware>();
@@ -171,4 +123,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

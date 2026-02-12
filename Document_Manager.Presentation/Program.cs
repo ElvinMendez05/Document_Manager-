@@ -15,7 +15,6 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthMessageHandler>();
 builder.Services.AddScoped<JwtAuthorizationMessageHandler>();
 
-
 //API service
 builder.Services.AddHttpClient<DocumentApiService>(client =>
 {

@@ -7,7 +7,6 @@ using System.Security.Claims;
 
 namespace Document_Manager.API.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class DocumentsController : ControllerBase
@@ -54,7 +53,7 @@ namespace Document_Manager.API.Controllers
 
 
         // POST: api/documents/upload
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpPost("upload")]
         public async Task<IActionResult> Upload([FromForm] UploadDocumentRequest request)
         {
@@ -118,7 +117,6 @@ namespace Document_Manager.API.Controllers
 
 
         // DELETE: api/documents/{id} 
-        [AllowAnonymous]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {

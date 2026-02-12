@@ -5,6 +5,6 @@ namespace Document_Manager.Application.Interfaces.Security
 {
     public interface IJwtTokenService
     {
-        string GenerateToken(ApplicationUser user);
+        string GenerateToken(ApplicationUser user, IList<string> roles);
     }
 }

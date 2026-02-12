@@ -21,6 +21,9 @@ namespace Document_Manager.Infrastructure.Persistence.Configurations
 
             builder.Property(d => d.CreatedAt)
                 .IsRequired();
+
+            builder.Property(d => d.UserId)
+                .IsRequired();
         }
     }
 }

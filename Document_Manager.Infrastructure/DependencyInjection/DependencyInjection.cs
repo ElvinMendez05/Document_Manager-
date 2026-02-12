@@ -1,10 +1,8 @@
 ﻿using Document_Manager.Application.Interfaces;
-using Document_Manager.Application.Interfaces.Security;
 using Document_Manager.Application.Services;
 using Document_Manager.Domain.Interfaces;
 using Document_Manager.Infrastructure.Persistence;
 using Document_Manager.Infrastructure.Repositories;
-using Document_Manager.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +21,6 @@ namespace Document_Manager.Infrastructure.DependencyInjection
 
             services.AddScoped<IDocumentRepository, DocumentRepository>();
             services.AddScoped<IFileStorageService, FileStorageService>();
-            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             return services;
         }
