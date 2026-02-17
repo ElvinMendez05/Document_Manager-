@@ -23,21 +23,49 @@ namespace Document_Manager.API.Controllers
 
         // GET: api/documents/my-documents
         // Devuelve SOLO los documentos del usuario autenticado
+        [Authorize(Roles = "User")]
         [HttpGet("my-documents")]
         public async Task<IActionResult> GetMyDocuments()
         {
-            var userId = Guid.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
-            );
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("No se pudo obtener el usuario del token.");
+
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized("Identificador de usuario inválido.");
 
             var documents = await _documentService.GetByUserAsync(userId);
+
             return Ok(documents);
         }
 
         // GET: api/documents/{id}
         // Obtiene un documento SOLO si pertenece al usuario
+        [Authorize(Roles = "User")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("No se pudo obtener el usuario del token.");
+
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized("Identificador de usuario inválido.");
+
+            var document = await _documentService.GetByIdForUserAsync(id, userId);
+
+            if (document == null)
+                return NotFound();
+
+            return Ok(document);
+        }
+
+        //Preview para el modal 
+        [Authorize(Roles = "User")]
+        [HttpGet("{id}/preview")]
+        public async Task<IActionResult> Preview(Guid id)
         {
             var userId = Guid.Parse(
                 User.FindFirst(ClaimTypes.NameIdentifier)!.Value
@@ -48,9 +76,19 @@ namespace Document_Manager.API.Controllers
             if (document == null)
                 return NotFound();
 
-            return Ok(document);
-        }
+            var physicalPath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                document.FilePath.TrimStart('/')
+            );
 
+            if (!System.IO.File.Exists(physicalPath))
+                return NotFound();
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(physicalPath);
+
+            return File(bytes, "application/pdf");
+        }
 
         // POST: api/documents/upload
         [Authorize(Roles = "User")]
@@ -63,7 +101,8 @@ namespace Document_Manager.API.Controllers
 
             // Validar extensión
             var allowedExtensions = new[] { ".pdf" };
-            var fileExtension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
+            var fileExtension = Path.GetExtension(request.File.FileName)
+                                    .ToLowerInvariant();
 
             if (!allowedExtensions.Contains(fileExtension))
                 return BadRequest("Solo se permiten archivos PDF.");
@@ -77,10 +116,14 @@ namespace Document_Manager.API.Controllers
             if (request.File.Length > maxFileSize)
                 return BadRequest("El archivo excede el tamaño máximo permitido (10MB).");
 
-            // Obtener UserId desde el JWT
-            var userId = Guid.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
-            );
+            // Obtener UserId desde el JWT de forma segura
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("No se pudo obtener el usuario desde el token.");
+
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized("El identificador del usuario no es válido.");
 
             // Guardar archivo físico
             var uploadsFolder = Path.Combine(
@@ -96,13 +139,15 @@ namespace Document_Manager.API.Controllers
             var fileName = $"{Guid.NewGuid()}{fileExtension}";
             var physicalPath = Path.Combine(uploadsFolder, fileName);
 
-            using var stream = new FileStream(physicalPath, FileMode.Create);
-            await request.File.CopyToAsync(stream);
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            {
+                await request.File.CopyToAsync(stream);
+            }
 
             // URL pública
             var publicUrl = $"/uploads/documents/{fileName}";
 
-            // Crear DTO para Application
+            // Crear DTO
             var dto = new CreateDocumentDto
             {
                 FileName = request.File.FileName,
@@ -115,18 +160,22 @@ namespace Document_Manager.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
-
         // DELETE: api/documents/{id} 
+        [Authorize(Roles = "User")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var userId = Guid.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
-            );
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return Unauthorized("No se pudo obtener el usuario del token.");
+
+            if (!Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized("Identificador de usuario inválido.");
 
             await _documentService.DeleteForUserAsync(id, userId);
+
             return NoContent();
         }
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Document_Manager.Application.DTOs.Auth;
 using Document_Manager.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Document_Manager.API.Controllers

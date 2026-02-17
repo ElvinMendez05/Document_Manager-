@@ -11,7 +11,4 @@
   <Folder Name="/Infrastructure/">
     <Project Path="Document_Manager.Infrastructure/Document_Manager.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/Presentation/">
-    <Project Path="Document_Manager.Presentation/Document_Manager.Presentation.csproj" />
-  </Folder>
 </Solution>

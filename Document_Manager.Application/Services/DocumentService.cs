@@ -9,10 +9,12 @@ namespace Document_Manager.Application.Services
         public class DocumentService : IDocumentService
         {
             private readonly IDocumentRepository _repository;
+            private readonly IFileStorageService _fileStorageService;
 
-            public DocumentService(IDocumentRepository repository)
+        public DocumentService(IDocumentRepository repository, IFileStorageService fileStorageService)
             {
                 _repository = repository;
+                _fileStorageService = fileStorageService;
             }
 
             // Crear documento asociado al usuario
@@ -80,6 +82,21 @@ namespace Document_Manager.Application.Services
                     CreatedAt = d.CreatedAt
                 }).ToList();
             }
+
+        public async Task<(byte[] Content, string FileName)>GetFileForUserAsync(Guid id, Guid userId)
+        {
+            var document = await _repository.GetByIdForUserAsync(id, userId); ;
+
+            if (document == null)
+                throw new Exception("Documento no encontrado");
+
+            if (document.UserId != userId)
+                throw new UnauthorizedAccessException();
+
+            var bytes = await _fileStorageService.GetFileAsync(document.FilePath);
+
+            return (bytes, document.FileName);
+        }
     }
     }
 

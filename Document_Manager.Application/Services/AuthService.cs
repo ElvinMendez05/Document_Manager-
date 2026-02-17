@@ -91,10 +91,26 @@ namespace Document_Manager.Application.Services
             var resetLink =
                 $"https://localhost/reset-password?token={Uri.EscapeDataString(token)}&email={dto.Email}";
 
+            var body = $@"
+                    <h2>Reset Password</h2>
+                    <p>Click the button below to reset your password:</p>
+                    <a href='{resetLink}' 
+                       style='
+                            display:inline-block;
+                            padding:10px 20px;
+                            background-color:#007bff;
+                            color:white;
+                            text-decoration:none;
+                            border-radius:5px;
+                       '>
+                        Reset Password
+                    </a>
+                ";
+
             await _emailService.SendAsync(
                 dto.Email,
                 "Reset Password",
-                $"Click here to reset your password:\n{resetLink}"
+                body
             );
         }
 

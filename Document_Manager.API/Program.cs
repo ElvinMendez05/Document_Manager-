@@ -63,7 +63,7 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -76,11 +76,20 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecuritySchemeReference("Bearer"),
+            new OpenApiSecuritySchemeReference("bearer"),
             new List<string>()
         }
     });
 });
+
+builder.Services.AddAuthentication("AuthCookie")
+    .AddCookie("AuthCookie", options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/Login";
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

@@ -6,10 +6,9 @@ namespace Document_Manager.Application.Interfaces
     {
         Task<Guid> CreateAsync(CreateDocumentDto dto);
         Task<List<DocumentDto>> GetAllAsync();
-
-        //Interface de relacion con el usuario 
         Task<List<DocumentDto>> GetByUserAsync(Guid userId);
         Task DeleteForUserAsync(Guid id, Guid userId);
         Task<DocumentDto?> GetByIdForUserAsync(Guid id, Guid userId);
+        Task<(byte[] Content, string FileName)> GetFileForUserAsync(Guid documentId, Guid userId);
     }
 }

@@ -21,5 +21,10 @@ namespace Document_Manager.Application.Services
 
             return fullPath;
         }
+
+        public async Task<byte[]> GetFileAsync(string path)
+        {
+            return await File.ReadAllBytesAsync(path);
+        }
     }
 }
