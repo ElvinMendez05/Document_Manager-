@@ -19,7 +19,7 @@ namespace Document_Manager.Application.Services
         {
             var smtpClient = new SmtpClient
             {
-                Host = _configuration["Email:Smtp"],
+                Host = _configuration["Email:Smtp"]!,
                 Port = int.Parse(_configuration["Email:Port"]!),
                 EnableSsl = true,
                 Credentials = new NetworkCredential(

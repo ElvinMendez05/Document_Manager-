@@ -3,7 +3,6 @@ using Document_Manager.Application.DependencyInjection;
 using Document_Manager.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.IdentityModel.Tokens.Jwt;
@@ -81,13 +80,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
-builder.Services.AddAuthentication("AuthCookie")
-    .AddCookie("AuthCookie", options =>
-    {
-        options.LoginPath = "/Auth/Login";
-        options.AccessDeniedPath = "/Auth/Login";
-    });
 
 builder.Services.AddAuthorization();
 

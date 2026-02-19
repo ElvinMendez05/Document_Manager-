@@ -30,25 +30,4 @@ namespace Document_Manager.Infrastructure.DependencyInjection
             return services;
         }
     }
-    //public static class IdentityServiceRegistration
-    //{
-    //    public static IServiceCollection AddIdentityServices(
-    //        this IServiceCollection services,
-    //        IConfiguration configuration)
-    //    {
-    //        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
-    //        {
-    //            options.Password.RequiredLength = 6;
-    //            options.Password.RequireDigit = true;
-    //            options.Password.RequireUppercase = false;
-    //            options.Password.RequireNonAlphanumeric = false;
-
-    //            options.User.RequireUniqueEmail = true;
-    //        })
-    //        .AddEntityFrameworkStores<AppDbContext>()
-    //        .AddDefaultTokenProviders();
-
-    //        return services;
-    //    }
-    //}
 }

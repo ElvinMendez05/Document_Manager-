@@ -89,7 +89,7 @@ namespace Document_Manager.Application.Services
                 await _userManager.GeneratePasswordResetTokenAsync(user);
 
             var resetLink =
-                $"https://localhost/reset-password?token={Uri.EscapeDataString(token)}&email={dto.Email}";
+                $"https://localhost:5058/Auth/ResetPassword?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(dto.Email)}";
 
             var body = $@"
                     <h2>Reset Password</h2>
@@ -117,7 +117,7 @@ namespace Document_Manager.Application.Services
         // ✅ RESET PASSWORD
         public async Task ResetPasswordAsync(ResetPasswordDto dto)
         {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
+            ApplicationUser? user = await _userManager.FindByEmailAsync(dto.Email);
 
             if (user == null)
                 throw new ApplicationException("User not found");
@@ -130,116 +130,14 @@ namespace Document_Manager.Application.Services
 
             if (!result.Succeeded)
             {
-                var errors = string.Join(", ",
+                string errors = string.Join(", \n",
                     result.Errors.Select(e => e.Description));
+
+
+           
 
                 throw new ApplicationException(errors);
             }
         }
     }
-    //public class AuthService : IAuthService
-    //{
-    //    private readonly UserManager<ApplicationUser> _userManager;
-    //    private readonly IJwtTokenService _jwtTokenService;
-    //    private readonly IEmailService _emailService;
-
-    //    public AuthService(UserManager<ApplicationUser> userManager, 
-    //        IJwtTokenService jwtTokenService, 
-    //        IEmailService emailService)
-    //    {
-    //        _userManager = userManager;
-    //        _jwtTokenService = jwtTokenService;
-    //        _emailService = emailService;
-    //    }
-
-    //    // REGISTER
-    //    public async Task RegisterAsync(RegisterDto dto)
-    //    {
-    //        if (dto.Password != dto.ConfirmPassword)
-    //            throw new ApplicationException("Las contraseñas no coinciden");
-
-    //        var userExists = await _userManager.FindByEmailAsync(dto.Email);
-    //        if (userExists != null)
-    //            throw new ApplicationException("El usuario ya existe");
-
-    //        var user = new ApplicationUser
-    //        {
-    //            FullName = dto.FullName,
-    //            UserName = dto.Email,
-    //            Email = dto.Email
-    //        };
-
-    //        var result = await _userManager.CreateAsync(user, dto.Password);
-
-    //        if (!result.Succeeded)
-    //        {
-    //            var errors = string.Join(
-    //                ", ",
-    //                result.Errors.Select(e => e.Description));
-
-    //            throw new ApplicationException(errors);
-    //        }
-    //    }
-
-    //    // LOGIN 
-    //    public async Task<string> LoginAsync(LoginRequest dto)
-    //    {
-    //        var user = await _userManager.FindByEmailAsync(dto.Email);
-
-    //        if (user == null)
-    //            throw new ApplicationException("Credenciales inválidas");
-
-    //        var valid = await _userManager.CheckPasswordAsync(user, dto.Password);
-
-    //        if (!valid)
-    //            throw new ApplicationException("Credenciales inválidas");
-
-    //        var roles = await _userManager.GetRolesAsync(user);
-
-    //        return _jwtTokenService.GenerateToken(user, roles);
-    //    }
-
-    //    // FORGOT PASSWORD
-    //    public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
-    //    {
-    //        var user = await _userManager.FindByEmailAsync(dto.Email);
-
-    //        if (user == null)
-    //            return; // seguridad
-
-    //        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-    //        var resetLink =
-    //            $"https://localhost:/reset-password?token={Uri.EscapeDataString(token)}&email={dto.Email}";
-
-    //        await _emailService.SendAsync(
-    //            dto.Email,
-    //            "Restablecer contraseña",
-    //            $"Haz clic aquí para restablecer tu contraseña:\n{resetLink}"
-    //        );
-    //    }
-
-    //    // ResetPasswordAsync
-    //    public async Task ResetPasswordAsync(ResetPasswordDto dto)
-    //    {
-    //        var user = await _userManager.FindByEmailAsync(dto.Email);
-
-    //        if (user == null)
-    //            throw new ApplicationException("Usuario no encontrado");
-
-    //        var result = await _userManager.ResetPasswordAsync(
-    //            user,
-    //            dto.Token,
-    //            dto.NewPassword
-    //            );
-
-    //        if (!result.Succeeded)
-    //        {
-    //            var errors = string.Join(", ",
-    //                result.Errors.Select(e => e.Description));
-
-    //            throw new ApplicationException(errors);
-    //        }
-    //    }
-    //}
 }

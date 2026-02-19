@@ -13,12 +13,12 @@ namespace Document_Manager.API.Controllers
     {
         private readonly IDocumentService _documentService;
         private readonly IFileStorageService _fileStorage;
-
-        public DocumentsController(IDocumentService documentService, IFileStorageService fileStorage)
+        
+        public DocumentsController(IDocumentService documentService, 
+                                   IFileStorageService fileStorage)
         {
             _documentService = documentService;
             _fileStorage = fileStorage;
-
         }
 
         // GET: api/documents/my-documents
@@ -79,7 +79,7 @@ namespace Document_Manager.API.Controllers
             var physicalPath = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
-                document.FilePath.TrimStart('/')
+                document.FilePath!.TrimStart('/')
             );
 
             if (!System.IO.File.Exists(physicalPath))
@@ -87,7 +87,28 @@ namespace Document_Manager.API.Controllers
 
             var bytes = await System.IO.File.ReadAllBytesAsync(physicalPath);
 
-            return File(bytes, "application/pdf");
+            // 🔥 Detectar Content-Type real
+            var extension = Path.GetExtension(physicalPath).ToLowerInvariant();
+
+            var contentType = extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                ".zip" => "application/zip",
+                ".rar" => "application/x-rar-compressed",
+                _ => "application/octet-stream"
+            };
+
+            return File(bytes, contentType);
         }
 
         // POST: api/documents/upload
@@ -100,16 +121,65 @@ namespace Document_Manager.API.Controllers
                 return BadRequest("No se ha enviado ningún archivo.");
 
             // Validar extensión
-            var allowedExtensions = new[] { ".pdf" };
+            var allowedExtensions = new[] { 
+                // Documentos
+                   ".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt",
+
+                // Hojas de cálculo
+                   ".xls", ".xlsx", ".csv", ".ods",
+
+                // Presentaciones
+                   ".ppt", ".pptx", ".odp",
+
+                // Imágenes
+                   ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg",
+
+                // Comprimidos
+               ".zip", ".rar", ".7z" };
+
             var fileExtension = Path.GetExtension(request.File.FileName)
                                     .ToLowerInvariant();
 
             if (!allowedExtensions.Contains(fileExtension))
-                return BadRequest("Solo se permiten archivos PDF.");
+                return BadRequest("Tipo de archivo no permitido.");
+
+            var allowedContentTypes = new[]
+               {
+                 // PDF
+                  "application/pdf",
+
+                 // Word
+                  "application/msword",
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
+                 // Excel
+                  "application/vnd.ms-excel",
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+                 // PowerPoint
+                  "application/vnd.ms-powerpoint",
+                  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+                 // Texto
+                  "text/plain",
+                  "text/csv",
+
+                 // Imágenes
+                  "image/jpeg",
+                  "image/png",
+                  "image/gif",
+                  "image/webp",
+                  "image/svg+xml",
+
+                 // Comprimidos
+                  "application/zip",
+                  "application/x-rar-compressed",
+                  "application/x-7z-compressed"
+            };
 
             // Validar Content-Type
-            if (request.File.ContentType != "application/pdf")
-                return BadRequest("El archivo no es un PDF válido.");
+            if (!allowedContentTypes.Contains(request.File.ContentType))
+                return BadRequest("Content-Type no permitido.");
 
             // Tamaño máximo (10MB)
             const long maxFileSize = 10 * 1024 * 1024;
