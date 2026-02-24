@@ -3,6 +3,8 @@ using Document_Manager.Application.Interfaces;
 using Document_Manager.Application.Interfaces.Security;
 using Document_Manager.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace Document_Manager.Application.Services
 {
@@ -85,11 +87,20 @@ namespace Document_Manager.Application.Services
             if (user == null)
                 return; // Security measure
 
-            var token =
-                await _userManager.GeneratePasswordResetTokenAsync(user);
+            //var token =
+            //    await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var encodedToken = WebEncoders.Base64UrlEncode(
+                Encoding.UTF8.GetBytes(token)
+            );
 
             var resetLink =
-                $"https://localhost:5058/Auth/ResetPassword?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(dto.Email)}";
+                $"http://localhost:5086/Auth/ResetPassword?token={encodedToken}&email={Uri.EscapeDataString(dto.Email)}";
+
+            //var resetLink =
+            //    $"http://localhost:5086/Auth/ResetPassword?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(dto.Email)}";
 
             var body = $@"
                     <h2>Reset Password</h2>
@@ -122,19 +133,27 @@ namespace Document_Manager.Application.Services
             if (user == null)
                 throw new ApplicationException("User not found");
 
+            // 🔥 DECODIFICAR TOKEN AQUÍ
+            var decodedToken = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(dto.Token)
+            );
+
             var result = await _userManager.ResetPasswordAsync(
                 user,
-                dto.Token,
+                decodedToken, // 👈 usar el token decodificado
                 dto.NewPassword
             );
+
+            //var result = await _userManager.ResetPasswordAsync(
+            //    user,
+            //    dto.Token,
+            //    dto.NewPassword
+            //);
 
             if (!result.Succeeded)
             {
                 string errors = string.Join(", \n",
                     result.Errors.Select(e => e.Description));
-
-
-           
 
                 throw new ApplicationException(errors);
             }

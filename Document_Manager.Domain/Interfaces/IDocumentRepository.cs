@@ -7,7 +7,6 @@ namespace Document_Manager.Domain.Interfaces
         
         //Interface para relacionar el usuario  
         Task<List<Document>> GetByUserIdAsync(Guid id, Guid userId);
-
         Task AddAsync(Document document);
         Task DeleteAsync(Document document);
 

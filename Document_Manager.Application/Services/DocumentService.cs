@@ -94,8 +94,6 @@ namespace Document_Manager.Application.Services
             byte[] bytes = await _fileStorageService.GetFileAsync(document.FilePath);
 
             return (bytes, document.FileName);
-
-
         }
     }
 }
