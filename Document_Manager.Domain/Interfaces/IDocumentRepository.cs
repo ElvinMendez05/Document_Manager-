@@ -9,7 +9,6 @@ namespace Document_Manager.Domain.Interfaces
         Task<List<Document>> GetByUserIdAsync(Guid id, Guid userId);
         Task AddAsync(Document document);
         Task DeleteAsync(Document document);
-
         Task<List<Document>> GetAllAsync(); // opcional
         Task<List<Document>> GetByUserAsync(Guid userId);
         Task<Document?> GetByIdForUserAsync(Guid id, Guid userId);

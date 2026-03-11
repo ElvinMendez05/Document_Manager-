@@ -171,10 +171,13 @@ namespace Document_Manager.API.Controllers
                   "image/webp",
                   "image/svg+xml",
 
-                 // Comprimidos
-                  "application/zip",
-                  "application/x-rar-compressed",
-                  "application/x-7z-compressed"
+                  // Comprimidos
+                   "application/zip",
+                   "application/x-zip-compressed",
+                   "application/octet-stream", 
+                   "application/x-rar-compressed",
+                   "application/vnd.rar",
+                   "application/x-7z-compressed"
             };
 
             // Validar Content-Type
@@ -184,7 +187,7 @@ namespace Document_Manager.API.Controllers
             // Tamaño máximo (10MB)
             const long maxFileSize = 10 * 1024 * 1024;
             if (request.File.Length > maxFileSize)
-                return BadRequest("El archivo excede el tamaño máximo permitido (10MB).");
+                return BadRequest("El archivo excede el tamaño máximo permitido 10MB .");
 
             // Obtener UserId desde el JWT de forma segura
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);

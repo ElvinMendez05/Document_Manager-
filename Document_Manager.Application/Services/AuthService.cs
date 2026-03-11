@@ -24,7 +24,7 @@ namespace Document_Manager.Application.Services
             _emailService = emailService;
         }
 
-        // ✅ REGISTER
+        // REGISTER
         public async Task RegisterAsync(RegisterDto dto)
         {
             if (dto.Password != dto.ConfirmPassword)
@@ -51,14 +51,14 @@ namespace Document_Manager.Application.Services
                 throw new ApplicationException(errors);
             }
 
-            // 🔥 Assign default role after successful creation
+            // Assign default role after successful creation
             if (!await _userManager.IsInRoleAsync(user, "User"))
             {
                 await _userManager.AddToRoleAsync(user, "User");
             }
         }
 
-        // ✅ LOGIN
+        // LOGIN
         public async Task<string> LoginAsync(LoginRequest dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -72,14 +72,14 @@ namespace Document_Manager.Application.Services
             if (!validPassword)
                 throw new ApplicationException("Invalid credentials");
 
-            // 🔥 Get real roles from Identity
+            // Get real roles from Identity
             var roles = await _userManager.GetRolesAsync(user);
 
-            // 🔥 Generate token with roles
+            // Generate token with roles
             return _jwtTokenService.GenerateToken(user, roles);
         }
 
-        // ✅ FORGOT PASSWORD
+        // FORGOT PASSWORD
         public async Task ForgotPasswordAsync(ForgotPasswordDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -140,7 +140,7 @@ namespace Document_Manager.Application.Services
 
             var result = await _userManager.ResetPasswordAsync(
                 user,
-                decodedToken, // 👈 usar el token decodificado
+                decodedToken, // usar el token decodificado
                 dto.NewPassword
             );
 

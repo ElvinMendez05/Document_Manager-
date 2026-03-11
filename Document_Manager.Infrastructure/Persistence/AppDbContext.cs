@@ -13,7 +13,6 @@ namespace Document_Manager.Infrastructure.Persistence
 
         public DbSet<Document> Documents => Set<Document>();
         
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
