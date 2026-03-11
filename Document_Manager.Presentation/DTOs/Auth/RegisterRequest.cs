@@ -1,8 +1,0 @@
-﻿namespace Document_Manager.Presentation.DTOs.Auth
-{
-    public class RegisterRequest
-    {
-        public string Email { get; set; } = "";
-        public string Password { get; set; } = "";
-    }
-}
